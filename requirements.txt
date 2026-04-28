@@ -1,0 +1,11 @@
+python-dotenv
+requests
+beautifulsoup4
+pypdf
+sentence-transformers
+chromadb
+google-generativeai
+pandas
+matplotlib
+streamlit
+tqdm
