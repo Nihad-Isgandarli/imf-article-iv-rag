@@ -1,0 +1,16 @@
+country,iso3,group,crisis_year,crisis_type,year_start,year_end
+Greece,GRC,treatment,2010,sovereign_debt,2007,2011
+Iceland,ISL,treatment,2008,banking,2005,2009
+Ireland,IRL,treatment,2008,banking,2005,2009
+Portugal,PRT,treatment,2011,sovereign_debt,2008,2012
+Spain,ESP,treatment,2012,banking,2009,2013
+Ukraine,UKR,treatment,2014,currency,2011,2015
+Argentina,ARG,treatment,2018,currency,2015,2019
+Turkey,TUR,treatment,2018,currency,2015,2019
+Pakistan,PAK,treatment,2018,currency,2015,2019
+Sri Lanka,LKA,treatment,2022,sovereign_debt,2019,2023
+Lebanon,LBN,treatment,2019,banking,2016,2020
+Zambia,ZMB,treatment,2020,sovereign_debt,2017,2021
+Switzerland,CHE,control,,,2015,2019
+Canada,CAN,control,,,2015,2019
+Korea,KOR,control,,,2015,2019
