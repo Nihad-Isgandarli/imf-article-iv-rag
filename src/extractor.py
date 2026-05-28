@@ -23,7 +23,9 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
 
 def main() -> None:
     """Quick test: extract text from turkey_2018.pdf and print summary."""
-    pdf_path = Path("data/raw/turkey_2018.pdf")
+    
+    project_root = Path(__file__).resolve().parent.parent
+    pdf_path = project_root / "data" / "raw" / "turkey_2018.pdf"
 
     if not pdf_path.exists():
         print(f"ERROR: File not found at {pdf_path}")

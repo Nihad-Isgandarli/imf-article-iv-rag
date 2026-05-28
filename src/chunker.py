@@ -33,7 +33,8 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]
 
 def main() -> None:
     """Quick test: extract Turkey 2018 PDF and chunk it."""
-    pdf_path = Path("data/raw/turkey_2018.pdf")
+    project_root = Path(__file__).resolve().parent.parent
+    pdf_path = project_root / "data" / "raw" / "turkey_2018.pdf"
 
     if not pdf_path.exists():
         print(f"ERROR: File not found at {pdf_path}")

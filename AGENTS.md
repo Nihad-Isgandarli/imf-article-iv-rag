@@ -36,7 +36,7 @@ We test whether the language and discourse in IMF Article IV reports contain det
 ## Tech Stack
 
 - **Language:** Python 3.13
-- **LLM:** Google Gemini API, free tier, model `gemini-1.5-flash`
+- **LLM:** Google Gemini API, free tier, model `gemini-2.5-flash`
 - **Embeddings:** `sentence-transformers`, model `all-MiniLM-L6-v2` (local, no API needed)
 - **Vector DB:** ChromaDB (local, persisted to `./chroma_db/`)
 - **Visualization:** Streamlit, matplotlib, pandas
