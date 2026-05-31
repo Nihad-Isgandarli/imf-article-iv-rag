@@ -138,7 +138,19 @@ def query_country_year(question: str, country: str, year: int) -> dict:
             raw_text = raw_text[len("json"):]
         raw_text = raw_text.strip()
 
-    parsed = json.loads(raw_text)
+    # Try to parse the JSON. If Gemini returned malformed output, don't crash:
+    # record a placeholder score of -1 and keep the raw text for inspection.
+    try:
+        parsed = json.loads(raw_text)
+    except json.JSONDecodeError:
+        print(f"      WARNING: could not parse JSON for {country} {year}. "
+              f"Recording score -1.")
+        parsed = {
+            "answer": f"PARSE_ERROR. Raw response: {raw_text}",
+            "concern_score": -1,
+            "reasoning": "Response was not valid JSON.",
+        }
+
 
     # 5. Assemble the final structured result
     return {
