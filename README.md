@@ -4,7 +4,7 @@ A RAG pipeline that reads IMF Article IV reports, scores how worried each report
 
 **Course:** Programming in Finance II — USI Lugano, Spring 2026
 **Topic:** 2.5 LLMs and RAG
-**Team:** Nihad Isgandarli, Alessandro Marcante, Vittoria Zupi
+**Team:** Nihad Isgandarli, Alessandro Marcante, Vittoria Zupo
 
 ---
 

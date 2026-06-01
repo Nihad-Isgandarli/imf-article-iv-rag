@@ -5,7 +5,7 @@ This document provides guidance for AI agents (Claude Code, Cursor, GitHub Copil
 ## Project Context
 
 **Course:** Programming in Finance II — USI Lugano, Spring 2026
-**Authors:** Nihad Isgandarli, Alessandro Marcante, Vittoria Zupi
+**Authors:** Nihad Isgandarli, Alessandro Marcante, Vittoria Zupo
 **Topic:** RAG-based early warning system using IMF Article IV consultation reports.
 
 We test whether the language and discourse in IMF Article IV reports contain detectable early warning signals of financial crises. We systematically query ~25-30 country-year reports with standardized "concern" questions using Retrieval Augmented Generation (RAG), score the responses, and compare scores to historical crisis dates from the Reinhart-Rogoff database.
