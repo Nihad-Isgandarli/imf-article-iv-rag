@@ -23,7 +23,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CHROMA_DB_DIR = PROJECT_ROOT / "chroma_db"
 COLLECTION_NAME = "imf_article_iv"
 
-GEMINI_MODEL_NAME = "gemini-2.5-flash"
+GEMINI_MODEL_NAME = "gemini-3.1-flash-lite"
+
 TOP_K = 5  # how many chunks to retrieve per query
 
 # --- Load the Gemini API key from the .env file ---
