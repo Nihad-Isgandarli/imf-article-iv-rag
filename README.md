@@ -49,11 +49,11 @@ We kept the sample small (14 countries) on purpose so we could look at each coun
 
 Each report is scored 0-10 on:
 
-1. External vulnerability (capital flows, reserves, current account)
-2. Banking sector (NPLs, capital, liquidity)
-3. Fiscal sustainability (deficit, debt)
-4. Real sector (growth, inflation, unemployment)
-5. Structural / political (institutions, reforms)
+1. Fiscal sustainability (public debt, deficits, financing needs)
+2. Banking sector (NPLs, capital, credit growth, liquidity)
+3. Policy urgency (how urgently the IMF calls for action)
+4. Deterioration vs previous years (growth, reserves, balances, asset quality)
+5. External vulnerability (capital outflows, currency pressure, reserves, balance of payments)
 
 ---
 
