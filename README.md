@@ -37,7 +37,7 @@ IMF PDFs -> extract text -> split into chunks -> embed -> store in ChromaDB
 ## Data
 
 - 55 IMF Article IV PDFs, 14 countries, 2014-2025
-- **Crisis countries (10):** Turkey, Argentina, Sri Lanka, Lebanon, Zambia, Pakistan, Ghana, Egypt, Ecuador
+- **Crisis countries (9):** Turkey, Argentina, Sri Lanka, Lebanon, Zambia, Pakistan, Ghana, Egypt, Ecuador
 - **Control countries (5):** Switzerland, Canada, Korea, Poland, Malaysia
 - Crisis dates: Reinhart-Rogoff data (up to 2016) + manual additions for recent crises. The source of each row is marked in `data/crises.csv`.
 
