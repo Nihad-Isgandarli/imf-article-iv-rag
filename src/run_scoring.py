@@ -19,29 +19,65 @@ from pathlib import Path
 
 from rag_query import query_country_year, _collection
 
-# --- The 5 standardized questions, one per risk dimension ---
-# These map to the 5 score columns. To change a question, edit it here only.
+# --- The 5 standardized questions (Vittoria's finalised spec) ---
+# Each has a scoring question (what Gemini answers) and a retrieval query
+# (keyword-rich text used to search ChromaDB). Order and labels follow
+# docs/rag_questions.md: q1 fiscal, q2 banking, q3 policy, q4 deterioration, q5 external.
 QUESTIONS = {
-    "q1_external": (
-        "Does the report express concern about the country's external "
-        "vulnerabilities, such as capital flows, FX reserves, or the current account?"
-    ),
-    "q2_banking": (
-        "Does the report express concern about the stability of the banking "
-        "sector, such as non-performing loans, capital adequacy, or liquidity?"
-    ),
-    "q3_fiscal": (
-        "Does the report express concern about fiscal sustainability, such as "
-        "the budget deficit, the public debt trajectory, or debt rollover risk?"
-    ),
-    "q4_real": (
-        "Does the report express concern about the real economy, such as "
-        "economic growth, inflation, or unemployment?"
-    ),
-    "q5_structural": (
-        "Does the report express concern about structural or political risks, "
-        "such as the quality of institutions, reform momentum, or policy credibility?"
-    ),
+    "q1_fiscal": {
+        "scoring": (
+            "To what extent does the report express concern about fiscal "
+            "sustainability — rising public debt, large or widening fiscal "
+            "deficits, or growing gross financing needs?"
+        ),
+        "retrieval": (
+            "public debt sustainability, debt-to-GDP ratio, fiscal deficit, "
+            "primary balance, gross financing needs, debt dynamics, fiscal consolidation"
+        ),
+    },
+    "q2_banking": {
+        "scoring": (
+            "To what extent does the report flag vulnerabilities in the banking "
+            "or financial sector — rising non-performing loans, thin capital "
+            "buffers, rapid credit growth, or funding/liquidity stress?"
+        ),
+        "retrieval": (
+            "non-performing loans, NPLs, bank capital adequacy, credit growth, "
+            "leverage, liquidity, financial stability, deposit outflows"
+        ),
+    },
+    "q3_policy": {
+        "scoring": (
+            "How urgent is the policy stance — does the report call for immediate, "
+            "urgent, or front-loaded action, or warn that delay carries significant risks?"
+        ),
+        "retrieval": (
+            "urgent action, immediate measures, without delay, decisive, "
+            "front-loaded, risks of inaction, pressing reforms"
+        ),
+    },
+    "q4_deterioration": {
+        "scoring": (
+            "Does the report describe a deterioration relative to previous years "
+            "in key macro-financial indicators (growth, reserves, fiscal or "
+            "external balances, asset quality)?"
+        ),
+        "retrieval": (
+            "deteriorated, worsened, declined, weakened, slowdown, downward "
+            "revision, compared with the previous year"
+        ),
+    },
+    "q5_external": {
+        "scoring": (
+            "To what extent does the report flag external vulnerabilities — "
+            "capital outflows or sudden stops, exchange-rate/currency pressure, "
+            "low or falling reserves, or current-account / balance-of-payments stress?"
+        ),
+        "retrieval": (
+            "capital outflows, sudden stop, foreign reserves, current account "
+            "deficit, balance of payments, exchange-rate pressure, external financing needs"
+        ),
+    },
 }
 
 # --- Paths (same PROJECT_ROOT convention as the other scripts) ---
@@ -88,8 +124,13 @@ def score_one_report(country: str, year: int) -> dict:
     scores = {}
     full_responses = {}
 
-    for question_key, question_text in QUESTIONS.items():
-        result = query_country_year(question_text, country, year)
+    for question_key, question_spec in QUESTIONS.items():
+        result = query_country_year(
+            question_spec["scoring"],
+            country,
+            year,
+            retrieval_query=question_spec["retrieval"],
+        )
         scores[question_key] = result["concern_score"]
         full_responses[question_key] = result
         print(f"    {question_key}: {result['concern_score']}/10")

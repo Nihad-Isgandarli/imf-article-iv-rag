@@ -41,11 +41,11 @@ _client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
 _collection = _client.get_collection(COLLECTION_NAME)
 _embedding_model = load_embedding_model()
 
-def retrieve_chunks(question: str, country: str, year: int, top_k: int = TOP_K) -> list[str]:
-    """Retrieve the most relevant chunks for a question from one country-year report.
+def retrieve_chunks(retrieval_query: str, country: str, year: int, top_k: int = TOP_K) -> list[str]:
+    """Retrieve the most relevant chunks for a retrieval query from one country-year report.
 
     Args:
-        question: The question to search for.
+        retrieval_query: The keyword-rich query used to search ChromaDB.
         country: Country to filter by (e.g. "turkey").
         year: Year to filter by (e.g. 2018).
         top_k: How many chunks to return.
@@ -53,8 +53,8 @@ def retrieve_chunks(question: str, country: str, year: int, top_k: int = TOP_K) 
     Returns:
         A list of the top_k most relevant chunk texts.
     """
-    # 1. Turn the question into a vector (same model used for the chunks)
-    question_embedding = embed_chunks([question], _embedding_model)
+    # 1. Turn the retrieval query into a vector (same model used for the chunks)
+    question_embedding = embed_chunks([retrieval_query], _embedding_model)
 
     # 2. Search ChromaDB, but ONLY within this country + year
     results = _collection.query(
@@ -71,7 +71,7 @@ def build_prompt(question: str, country: str, year: int, chunks: list[str]) -> s
     """Build the prompt sent to Gemini, asking for a structured JSON answer.
 
     Args:
-        question: The analytical question to answer.
+        question: The scoring question to answer.
         country: The country the report is about.
         year: The year of the report.
         chunks: The retrieved text chunks to ground the answer in.
@@ -87,10 +87,17 @@ consultation report for {country.title()} ({year}).
 
 Answer the question using ONLY the excerpts provided below. Do not use outside \
 knowledge. If the excerpts do not contain enough information, say so in your answer \
-and assign a low confidence.
+and assign a low concern score.
 
 QUESTION:
 {question}
+
+SCORING RUBRIC (0-10):
+- 0-2: Not raised, or explicitly reassuring / under control
+- 3-4: Mild, routine concern; risks noted but described as manageable
+- 5-6: Moderate concern; clear risks, monitoring or gradual action advised
+- 7-8: High concern; prominent risks, strong language, significant vulnerabilities
+- 9-10: Severe/acute concern; crisis-level language, imminent threat, urgent action demanded
 
 REPORT EXCERPTS:
 {context}
@@ -98,27 +105,32 @@ REPORT EXCERPTS:
 Respond with ONLY a valid JSON object, no other text, in exactly this format:
 {{
   "answer": "<one paragraph answering the question based on the excerpts>",
-  "concern_score": <integer from 0 to 10, where 0 = no concern at all and 10 = \
-severe, imminent risk>,
+  "concern_score": <integer from 0 to 10, following the rubric above>,
   "reasoning": "<one or two sentences explaining why you chose that score>"
 }}"""
 
     return prompt
 
-def query_country_year(question: str, country: str, year: int) -> dict:
+def query_country_year(question: str, country: str, year: int, retrieval_query: str = None) -> dict:
     """Run the full RAG pipeline for one question on one country-year report.
 
     Args:
-        question: The analytical question to answer.
+        question: The scoring question Gemini answers.
         country: Country to query (e.g. "turkey").
         year: Year to query (e.g. 2018).
+        retrieval_query: Keyword-rich query used to search ChromaDB. If not
+            given, the scoring question itself is used for retrieval.
 
     Returns:
         A dict with keys: country, year, question, answer, concern_score,
         reasoning, n_chunks.
     """
+    # If no separate retrieval query is given, fall back to the question
+    if retrieval_query is None:
+        retrieval_query = question
+
     # 1. RETRIEVAL: get the most relevant chunks for this report
-    chunks = retrieve_chunks(question, country, year)
+    chunks = retrieve_chunks(retrieval_query, country, year)
 
     # 2. Build the prompt grounded in those chunks
     prompt = build_prompt(question, country, year, chunks)
@@ -167,9 +179,13 @@ def query_country_year(question: str, country: str, year: int) -> dict:
 def main() -> None:
     """Quick test: run one question on one country-year report."""
     test_question = (
-        "Does the report express concern about the country's external "
-        "vulnerabilities, such as capital flows, FX reserves, or the "
-        "current account?"
+        "To what extent does the report flag external vulnerabilities — "
+        "capital outflows or sudden stops, exchange-rate/currency pressure, "
+        "low or falling reserves, or current-account stress?"
+    )
+    test_retrieval = (
+        "capital outflows, sudden stop, foreign reserves, current account "
+        "deficit, balance of payments, exchange-rate pressure, external financing needs"
     )
     test_country = "turkey"
     test_year = 2016
@@ -177,14 +193,4 @@ def main() -> None:
     print(f"Question: {test_question}")
     print(f"Report:   {test_country.title()} {test_year}\n")
 
-    result = query_country_year(test_question, test_country, test_year)
-
-    print("--- Result ---")
-    print(f"Concern score: {result['concern_score']} / 10")
-    print(f"Chunks used:   {result['n_chunks']}")
-    print(f"\nReasoning: {result['reasoning']}")
-    print(f"\nAnswer:\n{result['answer']}")
-
-
-if __name__ == "__main__":
-    main()
+    result = query_country_year(test_question, test_country, test_year, test_retrieval)
