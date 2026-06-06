@@ -20,13 +20,12 @@ CRISES_CSV = PROJECT_ROOT / "data" / "crises.csv"
 
 # The 5 score columns and friendly labels for the chart
 SCORE_COLUMNS = {
-    "q1_external": "External",
+    "q1_fiscal": "Fiscal",
     "q2_banking": "Banking",
-    "q3_fiscal": "Fiscal",
-    "q4_real": "Real economy",
-    "q5_structural": "Structural",
+    "q3_policy": "Policy urgency",
+    "q4_deterioration": "Deterioration",
+    "q5_external": "External",
 }
-
 
 @st.cache_data
 def load_data() -> pd.DataFrame:
