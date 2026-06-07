@@ -34,21 +34,26 @@ COUNTRIES_CSV = DATA_DIR / "countries.csv"
 
 TTEST_OUT = RESULTS_DIR / "ttest_results.csv"
 
-# 5 concern dimensions (must match Vittoria's column names)
-DIMENSIONS = ["external", "banking", "fiscal", "real", "structural"]
+DIMENSIONS = ["q1_fiscal", "q2_banking", "q3_policy", "q4_deterioration", "q5_external"]
 
 
-# ===== Data Loading =====
 def load_data() -> pd.DataFrame:
     """Merge scores + crisis flags + group labels into one analysis frame."""
     if not SCORES_CSV.exists():
         raise FileNotFoundError(
-            f"{SCORES_CSV} not found yet. Vittoria needs to push it first."
+            f"{SCORES_CSV} not found yet. Scoring needs to run first."
         )
 
     scores = pd.read_csv(SCORES_CSV)
     crises = pd.read_csv(CRISES_CSV)
     countries = pd.read_csv(COUNTRIES_CSV)[["country", "group"]]
+
+   
+    for d in (scores, crises, countries):
+        d["country"] = (
+            d["country"].str.strip().str.replace("_", " ", regex=False).str.title()
+        )
+    
 
     # Merge on (country, year)
     df = scores.merge(crises, on=["country", "year"], how="left")
@@ -56,33 +61,45 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-# ===== Analysis 1: T-tests =====
+#Analysis 1: T-tests 
+def add_precrisis_flag(df: pd.DataFrame) -> pd.DataFrame:
+    """Mark country-years that fall 1-2 years BEFORE a crisis."""
+    df = df.sort_values(["country", "year"]).copy()
+    df["any_crisis"] = df["any_crisis"].fillna(0)
+
+    
+    df["crisis_t1"] = df.groupby("country")["any_crisis"].shift(-1).fillna(0)
+    df["crisis_t2"] = df.groupby("country")["any_crisis"].shift(-2).fillna(0)
+    df["pre_crisis"] = ((df["crisis_t1"] == 1) | (df["crisis_t2"] == 1)).astype(int)
+    return df
+
+
 def run_ttests(df: pd.DataFrame) -> pd.DataFrame:
-    """For each dimension, compare crisis-year scores vs non-crisis scores."""
+    """Compare PRE-CRISIS scores (1-2 yrs before a crisis) vs calm years."""
+    df = add_precrisis_flag(df)
+
     results = []
     for dim in DIMENSIONS:
         if dim not in df.columns:
             print(f"  WARN: column '{dim}' not in scores — skipping")
             continue
-        crisis_scores = df[df["any_crisis"] == 1][dim].dropna()
-        normal_scores = df[df["any_crisis"] == 0][dim].dropna()
+        pre = df[df["pre_crisis"] == 1][dim].dropna()
+        calm = df[df["pre_crisis"] == 0][dim].dropna()
 
-        if len(crisis_scores) < 2 or len(normal_scores) < 2:
-            print(f"  WARN: not enough data for '{dim}' (crisis={len(crisis_scores)}, normal={len(normal_scores)})")
+        if len(pre) < 2 or len(calm) < 2:
+            print(f"  WARN: not enough data for '{dim}' (pre={len(pre)}, calm={len(calm)})")
             continue
 
-        # Welch's t-test (doesn't assume equal variances)
-        t_stat, p_value = stats.ttest_ind(crisis_scores, normal_scores, equal_var=False)
-        # Mann-Whitney U as a non-parametric backup
-        u_stat, u_pvalue = stats.mannwhitneyu(crisis_scores, normal_scores, alternative="two-sided")
+        t_stat, p_value = stats.ttest_ind(pre, calm, equal_var=False)
+        u_stat, u_pvalue = stats.mannwhitneyu(pre, calm, alternative="two-sided")
 
         results.append({
             "dimension": dim,
-            "n_crisis": len(crisis_scores),
-            "n_normal": len(normal_scores),
-            "mean_crisis": round(crisis_scores.mean(), 2),
-            "mean_normal": round(normal_scores.mean(), 2),
-            "diff": round(crisis_scores.mean() - normal_scores.mean(), 2),
+            "n_precrisis": len(pre),
+            "n_calm": len(calm),
+            "mean_precrisis": round(pre.mean(), 2),
+            "mean_calm": round(calm.mean(), 2),
+            "diff": round(pre.mean() - calm.mean(), 2),
             "t_stat": round(t_stat, 3),
             "t_pvalue": round(p_value, 4),
             "mannwhitney_pvalue": round(u_pvalue, 4),
@@ -92,7 +109,9 @@ def run_ttests(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(results)
 
 
-# ===== Analysis 2: ROC curves =====
+
+
+#Analysis 2: ROC curves 
 def plot_roc_curves(df: pd.DataFrame, out_path: Path) -> None:
     """Plot ROC curves for each dimension's ability to predict next-year crisis."""
     fig, ax = plt.subplots(figsize=(8, 7))
@@ -128,7 +147,7 @@ def plot_roc_curves(df: pd.DataFrame, out_path: Path) -> None:
     print(f"  Saved ROC curve ({plotted} dimensions plotted)")
 
 
-# ===== Analysis 3: Per-country time series =====
+#  Analysis 3: Per-country time series
 def plot_country_timeseries(df: pd.DataFrame, country: str, out_path: Path) -> None:
     """Plot all 5 concern dimensions over years for one country, with crisis shading."""
     sub = df[df["country"] == country].sort_values("year").copy()
@@ -161,7 +180,7 @@ def plot_country_timeseries(df: pd.DataFrame, country: str, out_path: Path) -> N
     plt.close()
 
 
-# ===== Analysis 4: Summary comparison =====
+# Analysis 4: Summary comparison 
 def plot_summary(df: pd.DataFrame, out_path: Path) -> None:
     """Bar chart: average score per dimension, treatment vs control vs crisis years."""
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -191,7 +210,7 @@ def plot_summary(df: pd.DataFrame, out_path: Path) -> None:
     plt.close()
 
 
-# ===== Main =====
+# Main
 def main() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
