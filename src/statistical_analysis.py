@@ -6,7 +6,7 @@ Reads:
   - data/countries.csv               (treatment/control groups)
 
 Produces:
-  - data/results/ttest_results.csv             (crisis vs control t-tests)
+  - data/results/ttest_results.csv             (pre-crisis vs calm t-tests)
   - data/figures/roc_curve.png                 (predictive power per dimension)
   - data/figures/{country}_timeseries.png      (per-country score evolution)
   - data/figures/summary_comparison.png        (group-level bar chart)
