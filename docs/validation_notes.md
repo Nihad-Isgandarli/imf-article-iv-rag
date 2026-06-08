@@ -4,9 +4,8 @@
 
 All 275 model responses (55 reports × 5 questions) were screened for **internal
 consistency** between the assigned 0–10 concern score, the model's own stated
-reasoning, and the scoring rubric in `docs/rag_questions.md`. The full answer and
-reasoning behind every score are available for inspection in `raw_responses.json`.
-This screening was done with AI assistance (Claude) and reviewed by the author.
+reasoning, and the rubric in `docs/rag_questions.md`. The full answer and reasoning behind every score are in
+`raw_responses.json`.
 
 ## Result
 
@@ -16,34 +15,38 @@ This screening was done with AI assistance (Claude) and reviewed by the author.
 | Unsure (flagged for reconsideration) | 1 |
 | Revise | 0 |
 
-The calibration is consistent across every score band: 0–2 scores correspond to
-reports described as sustainable / under control, 7–8 to strong-risk language, and
-9–10 to crisis-level language. No score plainly contradicts its reasoning.
+The calibration is consistent across every score band: 0–2 entries are described as
+sustainable / under control, 7–8 use strong-risk language, and 9–10 use crisis-level
+language. No score plainly contradicts its reasoning. The single **Unsure** is
+Ecuador 2024, `q1_fiscal = 6`: the IMF explicitly classifies the debt risk as
+"High", so a 7 may fit the rubric better; the 6 is kept defensible only by the
+"baseline path" hedge in the reasoning.
 
-The single **Unsure** is Ecuador 2024, `q1_fiscal = 6`: the IMF explicitly
-classifies the debt risk as "High", so a 7 may fit the rubric better; the 6 is kept
-defensible only by the "baseline path" hedge in the reasoning.
-
-## Findings
+## Calibration observations
 
 1. **Per-dimension scores localise the *type* of crisis.** External vulnerability
    (`q5`) is highest for the currency / balance-of-payments crises (Turkey,
-   Argentina, Pakistan), while fiscal (`q1`) is highest for the sovereign-debt
-   crises (Sri Lanka, Ghana, Zambia, Ecuador). The composite does not just rise
-   ahead of crises — it rises in the correct category.
+   Argentina, Pakistan), while fiscal sustainability (`q1`) is highest for the
+   sovereign-debt crises (Sri Lanka, Ghana, Zambia, Ecuador).
+2. **Banking (`q2`) separates weakly in this sample**, and the scores reflect why:
+   only Lebanon is primarily a banking crisis, so banking concern does not rise for
+   the (mostly currency / fiscal) treatment group, while controls carry moderate,
+   genuine banking concern (e.g. Switzerland 2023 = the UBS–Credit Suisse episode,
+   Canada = housing imbalances). The low separation is a feature of the sample, not
+   a scoring error.
+3. **Policy urgency (`q3`) scores high even for control countries**, because it
+   tracks the *forcefulness of IMF language*, which is elevated whenever the Fund
+   urges structural reform, crisis or not. Again a calibration caveat, not an error.
+4. **Moderate control scores on "hard" dimensions are economically real, not
+   noise** (Switzerland banking, Malaysia fiscal).
 
-2. **Policy urgency (`q3`) is the weakest discriminator.** It assigns 7–8 even to
-   control countries (Korea 2016 = 7, Malaysia 2023 = 8, Poland 2018 = 7) because it
-   measures the *forcefulness of IMF language*, which fires on structural-reform
-   advocacy regardless of crisis risk. This motivates the robustness check that
-   down-weights `q3`/`q4` in favour of the "hard" indicators `q1`/`q2`/`q5`.
-
-3. **The boundary cases are economically justified, not errors.** Controls scoring
-   moderately on a hard dimension reflect real issues (Switzerland 2023 = the
-   UBS–Credit Suisse merger; Malaysia = post-COVID debt build-up). Treatment
-   countries scoring low on a hard dimension *before* their crisis are correct
-   dimension-localisation, not missed signals (the currency crises show up in `q5`,
-   not in fiscal or banking).
+The *statistical* discriminating power of each dimension is reported in the academic
+report. Across the pre-crisis t-test and the next-year ROC, **external vulnerability
+(`q5`) is the dominant signal** (t = 6.0, p < 0.001; AUC 0.87), with deterioration
+(`q4`) the secondary warning (p = 0.034). Fiscal, banking and policy urgency are not
+significant on the pre-crisis test, though banking ranks second on the next-year
+AUC (0.78), a small-events artefact (a mean shift and a rank-based classifier need
+not agree when there are only ~5–6 crisis events).
 
 ## Limitation
 
