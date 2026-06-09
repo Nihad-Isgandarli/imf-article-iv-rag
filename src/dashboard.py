@@ -39,8 +39,8 @@ def load_data() -> pd.DataFrame:
     crises = pd.read_csv(CRISES_CSV)
 
     # Normalize country names to lowercase in BOTH files so they match
-    scores["country"] = scores["country"].str.lower()
-    crises["country"] = crises["country"].str.lower()
+    scores["country"] = scores["country"].str.lower().str.replace("_", " ")
+    crises["country"] = crises["country"].str.lower().str.replace("_", " ")
 
     # Keep only the columns we need from the crises file
     crises_small = crises[["country", "year", "any_crisis"]]
