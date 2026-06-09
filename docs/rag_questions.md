@@ -84,9 +84,11 @@ The five score columns are labelled `q1` fiscal, `q2` banking, `q3` policy urgen
 
 ## Aggregation
 
-The five per-question scores are averaged into an overall **Concern Score (0–10)** per
-country-report. Equal weighting is the default; the report should note a robustness check
-with alternative weights (e.g. emphasising Q1/Q2/Q5, the "hard" indicators, over Q3/Q4).
+The five per-question scores (each 0–10) are **summed** into an overall
+**Concern Score on a 0–50 scale** per country-report (equivalently, divide by
+five for a 0–10 average). Equal weighting is the default; the report should note
+a robustness check with alternative weights (e.g. emphasising Q1/Q2/Q5 — fiscal,
+banking, external, the "hard" indicators — over Q3/Q4).
 
 ## Implementation note
 
