@@ -48,9 +48,11 @@ significant on the pre-crisis test, though banking ranks second on the next-year
 AUC (0.78), a small-events artefact (a mean shift and a rank-based classifier need
 not agree when there are only ~5–6 crisis events).
 
-## Limitation
+## Limitation and manual check
 
-This pass verifies internal consistency (score vs reasoning vs rubric). It does
-**not** verify that the model's reasoning faithfully reflects the underlying IMF
-report text. For full rigour, a random sample of ~10–15 scored answers should be
-checked manually against the source PDFs.
+The internal-consistency pass above (score vs reasoning vs rubric) covers all 275
+responses. On its own it does **not** verify that the model's reasoning faithfully
+reflects the underlying IMF report text, so a random sample of 15 scored answers was
+additionally checked manually against the source PDFs; in this sample the assigned
+scores were consistent with the report text. This manual check is a spot check, not
+a full independent re-scoring of all 275 answers.
