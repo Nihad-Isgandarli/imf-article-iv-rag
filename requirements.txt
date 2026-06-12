@@ -2,8 +2,6 @@ pandas
 numpy
 openpyxl
 playwright
-requests
-beautifulsoup4
 pypdf
 fpdf2
 sentence-transformers
