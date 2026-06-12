@@ -8,40 +8,50 @@ This document provides guidance for AI agents (Claude Code, Cursor, GitHub Copil
 **Authors:** Nihad Isgandarli, Alessandro Marcante, Vittoria Zupo
 **Topic:** RAG-based early warning system using IMF Article IV consultation reports.
 
-We test whether the language and discourse in IMF Article IV reports contain detectable early warning signals of financial crises. We systematically query ~25-30 country-year reports with standardized "concern" questions using Retrieval Augmented Generation (RAG), score the responses, and compare scores to historical crisis dates from the Reinhart-Rogoff database.
+We test whether the language and discourse in IMF Article IV reports contain detectable early warning signals of financial crises. We systematically query 55 country-year reports across 14 countries (9 treatment, 5 control) with standardized "concern" questions using Retrieval Augmented Generation (RAG), score the responses, and compare scores to historical crisis dates from the Reinhart-Rogoff database.
 ## Repository Structure
 
 - `AGENTS.md` — this file, instructions for AI agents
 - `README.md` — human-facing project overview
 - `requirements.txt` — Python dependencies
-- `.env.example` — template for API keys (never commit real `.env`)
 - `.gitignore`
+- `LICENSE` — MIT license
+- `data/countries.csv` — list of analyzed countries with treatment/control metadata
+- `data/article_iv_links.csv` — IMF Article IV report URLs
+- `data/crises.csv` — historical crisis dates with source information
+- `data/crises_raw.xlsx` — raw Reinhart-Rogoff crisis workbook
 - `data/raw/` — downloaded PDFs (gitignored, too large)
-- `data/processed/` — extracted text chunks
-- `data/countries.csv` — list of analyzed countries with metadata
-- `data/crises.csv` — historical crisis dates (Reinhart-Rogoff)
-- `src/config.py` — constants, paths, model names
-- `src/scraper.py` — download IMF Article IV PDFs
-- `src/extractor.py` — extract text from PDFs (pypdf)
+- `data/results/concern_scores.csv` — final concern scores
+- `data/results/raw_responses.json` — raw Gemini responses
+- `data/figures/` — generated analysis charts
+- `docs/rag_questions.md` — standardized RAG scoring questions
+- `docs/results_interpretation.md` — interpretation of scoring outputs
+- `docs/validation_notes.md` — validation and methodology notes
+- `src/build_crises_csv.py` — build `data/crises.csv`
+- `src/build_vectordb.py` — ChromaDB ingestion and querying
 - `src/chunker.py` — split text into chunks
-- `src/embedder.py` — generate embeddings (sentence-transformers)
-- `src/vector_store.py` — ChromaDB ingestion and querying
-- `src/llm_query.py` — Gemini API querying with RAG context
-- `src/scorer.py` — convert LLM responses to 0-10 concern scores
-- `src/analysis.py` — compare concern scores to crisis dates
-- `dashboard/app.py` — Streamlit dashboard
-- `docs/academic_report.tex` — 5-8 page LaTeX report (iCorsi submission)
-- `tests/` — unit tests for all `src/` modules
+- `src/dashboard.py` — Streamlit dashboard
+- `src/download_pdfs.py` — download IMF Article IV PDFs
+- `src/embedder.py` — generate embeddings with sentence-transformers
+- `src/explore_crises.py` — inspect and validate crisis data
+- `src/explore_links.py` — find and inspect IMF report links
+- `src/extractor.py` — extract text from PDFs with pypdf
+- `src/fetch_lebanon_2018.py` — add Lebanon 2018 text fallback
+- `src/rag_query.py` — Gemini API querying with RAG context
+- `src/run_scoring.py` — convert LLM responses to concern scores
+- `src/statistical_analysis.py` — compare concern scores to crisis dates
+- `src/test_gemini.py` — manual Gemini API smoke test
+- `src/test_playwright.py` — manual Playwright smoke test
 
 ## Tech Stack
 
 - **Language:** Python 3.13
-- **LLM:** Google Gemini API, free tier, model `gemini-2.5-flash`
+- **LLM:** Google Gemini API, free tier, model `gemini-3.1-flash-lite`
 - **Embeddings:** `sentence-transformers`, model `all-MiniLM-L6-v2` (local, no API needed)
 - **Vector DB:** ChromaDB (local, persisted to `./chroma_db/`)
 - **Visualization:** Streamlit, matplotlib, pandas
 - **PDF parsing:** `pypdf`
-- **Web scraping:** `requests`, `beautifulsoup4`
+- **Web scraping:** Playwright (chromium)
 
 ## How We Satisfy the Project Requirements
 
@@ -95,16 +105,19 @@ A PR cannot be merged until at least one human contributor approves it.
 - Follow PEP 8 for Python style.
 - All public functions must have docstrings (Google style).
 - Type hints required for function signatures.
-- No hardcoded API keys, absolute file paths, or magic numbers — use `src/config.py` and environment variables (`.env`).
+- No hardcoded API keys, absolute file paths, or magic numbers — use environment variables (`.env`) and module-level constants where appropriate.
 - Prefer pure functions: take inputs, return outputs, minimal side effects.
 - Each module in `src/` has a single, clear responsibility.
 - Maximum function length: ~50 lines. If longer, split it.
 
-## Testing Requirements
+## Testing
 
-- All new functions in `src/` must have at least one unit test in `tests/`.
-- Run tests before opening a PR: `pytest tests/`
-- For functions that call external APIs (Gemini, IMF.org), mock the responses in tests — never hit live APIs from tests.
+This repository currently uses manual smoke tests rather than an automated unit-test suite. Before opening a PR, run the relevant scripts for the area changed:
+
+- `python src/test_gemini.py` — verify Gemini API access and model behavior.
+- `python src/test_playwright.py` — verify Playwright/chromium access to IMF pages.
+
+For documentation-only changes, verify the edited files by inspection and with `git diff --check`.
 ## Instructions for AI Agents
 
 ### Before Making Any Changes
@@ -143,7 +156,7 @@ The course rubric requires at least one Pull Request made by an AI agent. We tra
 
 | PR # | Agent | Task | Status |
 |------|-------|------|--------|
-| TBD  | TBD   | TBD  | TBD    |
+| GitHub-assigned PR number | Claude Code | Documentation sync: align AGENTS.md, requirements.txt and README with the implemented code | Open |
 
 When an AI agent (Claude Code, Cursor agent mode, GitHub Copilot Workspace, etc.) opens a PR:
 
