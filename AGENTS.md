@@ -156,7 +156,7 @@ The course rubric requires at least one Pull Request made by an AI agent. We tra
 
 | PR # | Agent | Task | Status |
 |------|-------|------|--------|
-| GitHub-assigned PR number | Claude Code | Documentation sync: align AGENTS.md, requirements.txt and README with the implemented code | Open |
+| #1 | Claude Code | Documentation sync: align AGENTS.md, requirements.txt and README with the implemented code | Open |
 
 When an AI agent (Claude Code, Cursor agent mode, GitHub Copilot Workspace, etc.) opens a PR:
 
