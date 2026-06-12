@@ -14,7 +14,7 @@ Do IMF Article IV reports contain early warning signals of financial crises?
 
 Most crisis-prediction research uses numbers (debt ratios, reserves, deficits). The actual text of IMF reports is rarely analyzed at scale. We use RAG + an LLM to score the text and see if the warning was already there in the IMF's own words.
 
-Anchor example: IMF Greece 2009 report -> Greek debt crisis in 2010.
+Anchor example: IMF Lebanon 2018 report (concern score 42/50) -> banking & financial crisis in 2019.
 
 ---
 
@@ -64,19 +64,25 @@ data/
   countries.csv          # country list + treatment/control
   article_iv_links.csv   # report URLs
   crises.csv             # crisis dates with source column
+  results/               # concern scores and raw Gemini responses
+  figures/               # generated analysis charts
   raw/                   # the PDFs (not in git)
 src/
   extractor.py           # PDF -> text
   chunker.py             # text -> chunks
   embedder.py            # chunks -> embeddings
   explore_links.py       # find report links on imf.org
+  explore_crises.py      # inspect crisis data
   download_pdfs.py       # download the PDFs
+  fetch_lebanon_2018.py  # add Lebanon 2018 text fallback
   build_crises_csv.py    # build crises.csv
   build_vectordb.py      # load chunks into ChromaDB
   rag_query.py           # ask Gemini a question about a report
   run_scoring.py         # score all reports
   statistical_analysis.py# t-tests, ROC, charts
   dashboard.py           # Streamlit dashboard
+  test_gemini.py         # manual Gemini API smoke test
+  test_playwright.py     # manual Playwright smoke test
 ```
 
 ---
